@@ -1,0 +1,297 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class TodoListApp {
+
+    private JFrame loginFrame;
+    private JTextField usernameField;
+    private JPasswordField passwordField;
+    private JFrame mainFrame;
+    private JTextField taskField;
+    private JTabbedPane tabbedPane;
+    private DefaultListModel<String>[] taskListModels;
+    private JList<String>[] taskLists;
+
+    public TodoListApp() {
+        createLoginForm(); // Initialize the login form
+    }
+
+    // Method to create the login form
+    private void createLoginForm() {
+        loginFrame = new JFrame("Login");
+        loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        loginFrame.setSize(600, 400);
+        loginFrame.setLayout(new BorderLayout());
+
+        // Title panel with the application name
+        JPanel titlePanel = new JPanel();
+        titlePanel.setBackground(Color.BLACK); // Set background to black
+        JLabel titleLabel = new JLabel("Cozease: Daily Task Companion");
+        titleLabel.setFont(new Font("Rockwell", Font.BOLD, 35)); // Set font to Times New Roman
+        titleLabel.setForeground(Color.WHITE); // Set color to white
+        titlePanel.add(titleLabel);
+        loginFrame.add(titlePanel, BorderLayout.NORTH);
+
+        // Main login panel
+        JPanel loginPanel = new JPanel(new GridBagLayout());
+        loginPanel.setBackground(Color.BLACK); // Set background to black
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(8, 8, 8, 8); // Add some padding
+
+        // Username label and field
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.EAST;
+        JLabel usernameLabel = new JLabel("Username:");
+        usernameLabel.setFont(new Font("Arial", Font.PLAIN, 20));
+        usernameLabel.setForeground(Color.WHITE); // Set text color to white
+        loginPanel.add(usernameLabel, gbc);
+        usernameField = new JTextField(20);
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+        loginPanel.add(usernameField, gbc);
+
+        // Password label and field
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.EAST;
+        JLabel passwordLabel = new JLabel("Password:");
+        passwordLabel.setFont(new Font("Arial", Font.PLAIN, 20));
+        passwordLabel.setForeground(Color.WHITE); // Set text color to white
+        loginPanel.add(passwordLabel, gbc);
+        passwordField = new JPasswordField(20);
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        loginPanel.add(passwordField, gbc);
+
+        // Login and Exit buttons
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        buttonPanel.setBackground(Color.BLACK); // Set background to black
+        JButton loginButton = new JButton("Login");
+        JButton exitButton = new JButton("Exit");
+        buttonPanel.add(loginButton);
+        buttonPanel.add(exitButton);
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        loginPanel.add(buttonPanel, gbc);
+
+        loginFrame.add(loginPanel, BorderLayout.CENTER);
+
+        // Action listener for login button
+        loginButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String username = usernameField.getText();
+                String password = new String(passwordField.getPassword());
+                if (validateLogin(username, password)) {
+                    loginFrame.dispose(); // Close login frame
+                    createMainApp(); // Open main application
+                } else {
+                    JOptionPane.showMessageDialog(loginFrame, "Invalid login. Please try again.");
+                }
+            }
+        });
+
+        // Action listener for exit button
+        exitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int response = JOptionPane.showConfirmDialog(loginFrame, "Are you sure you want to exit?", "Confirm Exit", JOptionPane.YES_NO_OPTION);
+                if (response == JOptionPane.YES_OPTION) {
+                    System.exit(0); // Exit the application
+                }
+            }
+        });
+
+        loginFrame.setVisible(true); // Make the login frame visible
+    }
+
+    // Simple login validation method
+    private boolean validateLogin(String username, String password) {
+        // Credentials for demonstration purposes
+        return username.equals("admin") && password.equals("password");
+    }
+
+    // Method to create the main application GUI
+private void createMainApp() {
+    mainFrame = new JFrame("To-Do List Application");
+    mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    mainFrame.setSize(600, 400);
+    mainFrame.setLayout(new BorderLayout());
+
+    // Input panel for adding new tasks
+    JPanel inputPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10)); // FlowLayout for center alignment
+    taskField = new JTextField(25); 
+    taskField.setPreferredSize(new Dimension(80, 20));
+    JButton addButton = new JButton("Add Task");
+    addButton.setFont(new Font("Arial", Font.BOLD, 10));
+    inputPanel.add(taskField); // Add taskField first
+    inputPanel.add(addButton); // Then add addButton
+    mainFrame.add(inputPanel, BorderLayout.NORTH);
+
+    // Tabbed pane for days of the week
+    tabbedPane = new JTabbedPane();
+    tabbedPane.setBackground(new Color(173, 216, 230)); // RGB values for pastel blue
+    taskListModels = new DefaultListModel[7];
+    taskLists = new JList[7];
+    String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+    for (int i = 0; i < 7; i++) {
+        taskListModels[i] = new DefaultListModel<>();
+        taskLists[i] = new JList<>(taskListModels[i]);
+        tabbedPane.addTab(days[i], new JScrollPane(taskLists[i]));
+    }
+    mainFrame.add(tabbedPane, BorderLayout.CENTER);
+
+    // Button panel for completing, deleting, clearing tasks, and logging out
+        JPanel buttonPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5); // Add some padding between buttons
+        gbc.gridx = 0;
+        gbc.gridy = GridBagConstraints.RELATIVE; // Position buttons vertically
+
+        JButton completeButton = new JButton("Complete");
+        completeButton.setFont(new Font("Arial", Font.BOLD, 10));
+        completeButton.setBackground(new Color(144, 238, 144)); // Set pastel green background color
+        JButton deleteButton = new JButton("Delete");
+        deleteButton.setFont(new Font("Arial", Font.BOLD, 10));
+        deleteButton.setBackground(new Color(255, 182, 193)); // Set pastel red background color
+        JButton clearButton = new JButton("Clear");
+        clearButton.setFont(new Font("Arial", Font.BOLD, 10));
+        clearButton.setBackground(new Color(255, 218, 185)); // Set pastel orange background color
+        JButton logoutButton = new JButton("Logout");
+        logoutButton.setFont(new Font("Arial", Font.BOLD, 10));
+        logoutButton.setBackground(Color.RED);
+        logoutButton.setForeground(Color.WHITE);
+
+        Dimension buttonSize = new Dimension(80, 40);
+        completeButton.setPreferredSize(buttonSize);
+        deleteButton.setPreferredSize(buttonSize);
+        clearButton.setPreferredSize(buttonSize);
+        
+        Dimension smallerButtonSize = new Dimension (80,30);
+        logoutButton.setPreferredSize(smallerButtonSize);
+        addButton.setPreferredSize(smallerButtonSize);
+
+        buttonPanel.add(completeButton, gbc);
+        buttonPanel.add(deleteButton, gbc);
+        buttonPanel.add(clearButton, gbc);
+
+        // Add some space before the logout button
+        gbc.insets = new Insets(100, 5, 5, 5);
+        buttonPanel.add(logoutButton, gbc);
+
+        mainFrame.add(buttonPanel, BorderLayout.EAST);
+
+    // Action listener for adding tasks
+    addButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String task = taskField.getText();
+            if (!task.isEmpty()) {
+                // Times from 12 AM to 11 PM
+                String[] times = new String[24];
+                for (int i = 0; i < 24; i++) {
+                    times[i] = String.format("%02d:00 %s", i % 12 == 0 ? 12 : i % 12, i < 12 ? "AM" : "PM");
+                }
+
+                // Show input dialog to select task time
+                String selectedTime = (String) JOptionPane.showInputDialog(
+                    mainFrame,
+                    "Select task time:",
+                    "Task Time",
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    times,
+                    times[0]
+                );
+
+                if (selectedTime != null) {
+                    int selectedIndex = tabbedPane.getSelectedIndex();
+                    taskListModels[selectedIndex].addElement(task + " at " + selectedTime); // Add task with time
+                    taskField.setText(""); // Clear the input field
+                }
+            }
+        }
+    });
+
+    // Action listener for marking tasks as complete
+    completeButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int selectedIndex = tabbedPane.getSelectedIndex();
+            if (selectedIndex >= 0 && selectedIndex < taskLists.length) {
+                int taskIndex = taskLists[selectedIndex].getSelectedIndex();
+                if (taskIndex != -1) {
+                    int response = JOptionPane.showConfirmDialog(mainFrame, "Are you sure you want to mark this task as completed?", "Confirm Complete Task", JOptionPane.YES_NO_OPTION);
+                    if (response == JOptionPane.YES_OPTION) {
+                        String task = taskListModels[selectedIndex].get(taskIndex);
+                        // Remove previous "Completed" tag if exists
+                        task = task.replaceAll(" \\(Completed\\)$", "");
+                        // Mark task as complete and color "Completed" in green
+                        taskListModels[selectedIndex].set(taskIndex, "<html>" + task + " <font color='green'>(Completed)</font></html>");
+                    }
+                }
+            }
+        }
+    });
+
+    // Action listener for deleting tasks
+deleteButton.addActionListener(new ActionListener() {
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        int selectedIndex = tabbedPane.getSelectedIndex();
+        int taskIndex = taskLists[selectedIndex].getSelectedIndex();
+        if (taskIndex != -1) {
+            int option = JOptionPane.showConfirmDialog(mainFrame,
+                    "Are you sure you want to delete this task?",
+                    "Confirm Delete", JOptionPane.YES_NO_OPTION);
+            if (option == JOptionPane.YES_OPTION) {
+                taskListModels[selectedIndex].remove(taskIndex); // Remove selected task
+            }
+        } else {
+            JOptionPane.showMessageDialog(mainFrame,
+                    "Please select a task to delete.",
+                    "No Task Selected", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+});
+
+    // Action listener for clearing tasks of the selected day
+    clearButton.addActionListener(new ActionListener() {
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        int selectedIndex = tabbedPane.getSelectedIndex();
+        if (selectedIndex >= 0 && selectedIndex < taskLists.length) {
+            int response = JOptionPane.showConfirmDialog(mainFrame, "Are you sure you want to clear all tasks for " + days[selectedIndex] + "?", "Confirm Clear Tasks", JOptionPane.YES_NO_OPTION);
+            if (response == JOptionPane.YES_OPTION) {
+                taskListModels[selectedIndex].clear(); // Clear tasks for the selected day
+            }
+        }
+    }
+});
+
+    // Action listener for logging out
+    logoutButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int response = JOptionPane.showConfirmDialog(mainFrame, "Are you sure you want to log out?", "Confirm Logout", JOptionPane.YES_NO_OPTION);
+            if (response == JOptionPane.YES_OPTION) {
+                mainFrame.dispose(); // Close the main frame
+                createLoginForm(); // Return to login screen
+            }
+        }
+    });
+
+    mainFrame.setVisible(true); // Make the main frame visible
+}
+
+    public static void main(String[] args) {
+        new TodoListApp(); // Create an instance of TodoListApp to launch the application
+    }
+}
